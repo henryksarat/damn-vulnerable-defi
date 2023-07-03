@@ -46,7 +46,7 @@ See this in the [unstoppable.challange.js unit test](/test/unstoppable/unstoppab
 * Creating a [TokenVault (ERC4626)](https://ethereum.org/en/developers/docs/standards/tokens/erc-4626/)
 
 
-**Naive Receiver**
+## Naive Receiver
 
 **FlashLoanReceiver.sol** is an honest receiver (aka victim) of the flash loan and implements **IERC3156FlashBorrower** interface how it is supposed to. However, the Pool (**NaiveReceiverLenderPool.sol**) has a bad programmer that doesn't even check who is calling for the flash loan. The Pool blindly executes on whichever smart contract is passed in that implements the **IERC3156FlashBorrower** interface.
 
@@ -58,11 +58,15 @@ See this in the [unstoppable.challange.js unit test](/test/unstoppable/unstoppab
 
 Here is the code to drain the victim:
 
+```
 for(var i =0; i< 10; i++) {
     await pool.connect(player).flashLoan(victim.address, ETH, 0, new TextEncoder().encode(""))
 }
+```
 
 See this in the [naive-receiver.challange.js unit test](/test/naive-receiver/naive-receiver.challenge.js).
+
+This can also be done in one transaction by wrapping the execution in a smart contract. See [NaiveAttacker.sol](contracts/naive-receiver/NaiveAttacker.sol) to see how.
 
 Concepts:
 * Create an interface to call against
