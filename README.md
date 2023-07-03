@@ -20,11 +20,17 @@ DO NOT USE IN PRODUCTION.
 
 # Solution Details
 
-### Unstoppable
+How to execute one test for a quick development loop:
 
-In UnstoppableVault.sol, the "flashLoan" method has a check to see if totalSupply != totalAssets. The "totalSupply" and "totalAssets" will increment if you call "deposit". However, "totalAssets" will ONLY increase if you do a traditional ERC20 "transfer" to the UnstoppableVault smart contract.
+```
+npx hardhat test --grep "Unstop"
+```
 
-So doing the following would break the UnstoppableVault:
+## Unstoppable
+
+In **UnstoppableVault.sol**, the _flashLoan()_ method has a check to see if **totalSupply != totalAssets**. The _totalSupply_ and _totalAssets_ will increment if you call _deposit()_. However, _totalAssets_ will ONLY increase if you execute a traditional ERC20 _transfer()_ to the UnstoppableVault smart contract.
+
+So, executing the following would break the UnstoppableVault:
 
 ```
 await token.connect(player).transfer(vault.address, 1n);
@@ -35,4 +41,4 @@ See this in the [unstoppable.challange.js unit test](/test/unstoppable/unstoppab
 
 **Concepts**
 * ERC20 transfer, safeTransferFrom, safeTransfer
-* Creating a TokenVault (ERC4626)
+* Creating a [TokenVault (ERC4626)](https://ethereum.org/en/developers/docs/standards/tokens/erc-4626/)
