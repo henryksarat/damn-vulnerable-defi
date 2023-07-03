@@ -6,6 +6,7 @@ import "solmate/src/utils/ReentrancyGuard.sol";
 import { SafeTransferLib, ERC4626, ERC20 } from "solmate/src/mixins/ERC4626.sol";
 import "solmate/src/auth/Owned.sol";
 import { IERC3156FlashBorrower, IERC3156FlashLender } from "@openzeppelin/contracts/interfaces/IERC3156.sol";
+import "hardhat/console.sol";
 
 /**
  * @title UnstoppableVault
@@ -93,6 +94,13 @@ contract UnstoppableVault is IERC3156FlashLender, ReentrancyGuard, Owned, ERC462
         if (amount == 0) revert InvalidAmount(0); // fail early
         if (address(asset) != _token) revert UnsupportedCurrency(); // enforce ERC3156 requirement
         uint256 balanceBefore = totalAssets();
+        
+        // Henryk: Added some console logging since these values are used
+        // to do the exploit
+        console.log("balanceBefore aka totalAssets aka balance of asset =%s", balanceBefore);
+        console.log("convertToShares(totalSupply)=%s", convertToShares(totalSupply));
+        console.log("totalSupply=%s", totalSupply);
+
         if (convertToShares(totalSupply) != balanceBefore) revert InvalidBalance(); // enforce ERC4626 requirement
         uint256 fee = flashFee(_token, amount);
         // transfer tokens out + execute callback on receiver
