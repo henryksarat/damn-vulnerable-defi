@@ -44,3 +44,26 @@ See this in the [unstoppable.challange.js unit test](/test/unstoppable/unstoppab
 **Concepts**
 * ERC20 transfer, safeTransferFrom, safeTransfer
 * Creating a [TokenVault (ERC4626)](https://ethereum.org/en/developers/docs/standards/tokens/erc-4626/)
+
+
+**Naive Receiver**
+
+**FlashLoanReceiver.sol** is an honest receiver (aka victim) of the flash loan and implements **IERC3156FlashBorrower** interface how it is supposed to. However, the Pool (**NaiveReceiverLenderPool.sol**) has a bad programmer that doesn't even check who is calling for the flash loan. The Pool blindly executes on whichever smart contract is passed in that implements the **IERC3156FlashBorrower** interface.
+
+**Exploit**
+
+1. Create an attacker smart contract which has the address of the Pool and the victim that implemented **IERC3156FlashBorrower**.
+2. Execute a flash loan of 0 amount 10 times. The victim smart contract pays back the full amount plus the Pool fee of 1 ether. Calling this 10 times will then effectively drain the 10 ether that the victim had.
+3. That's it! In conclusion, by only having the address of a smart contract that interacts with this Pool (the victim), I can drain the victim because the Pool doesn't take precautions to check who is executing the flash loan.
+
+Here is the code to drain the victim:
+
+for(var i =0; i< 10; i++) {
+    await pool.connect(player).flashLoan(victim.address, ETH, 0, new TextEncoder().encode(""))
+}
+
+See this in the [naive-receiver.challange.js unit test](/test/naive-receiver/naive-receiver.challenge.js).
+
+Concepts:
+* Create an interface to call against
+* Using the **IERC3156FlashBorrower** interface
