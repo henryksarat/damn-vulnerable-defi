@@ -24,6 +24,11 @@ contract SideEntranceAttacker {
 
     function attack() external {
         pool.flashLoan(address(pool).balance);
+
+        // Henryk: we passed all of the verification checks from the flash loan by
+        // now so lets do a withdraw to take the funds. "receive()" will be called
+        // when we receive the Eth so we can send out the Eth to an outside 
+        // address
         pool.withdraw();
     }
 
