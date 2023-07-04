@@ -110,3 +110,29 @@ Concepts:
 * Execute against a smart contract even though the smart contract doesn't inherit the intended interface
 * Override **receive()** function of the smart contract
 * Using __payable__ to **send()** Eth
+
+## Rewarder
+
+The **FlashLoanerPool** is responsible for the flash loan. It will call a function against the **sender** as long as **receiveFlashLoan(uint256)** is implemented. As a verification it will check that the balance of the tokens are the same as before giving out the flash loan. Note that it just checks the **total tokens** in the Pool and __not__ who owns what tokens. 
+
+
+**TheRewarderPool** has a function called **distributeRewards()** that is the bulk of our interest. This function will see what the current amount of deposits are and the amount deposited by the current caller (aka sender) of **distributeRewards()**. There is a time check to make sure that a distribution has not happened within 5 days of the last distribution. 
+
+The Exploit:
+1. Send time forward by 5 days.
+2. Receive the max amount of **liquidityToken** possible in the flash loan by implementing the **receiveFlashLoan(uint256)** in the attacker smart contract and getting the token balance of the **FlashLoanerPool** for the **liquidityToken**.
+3. When the flash loan is received, **deposit()** it into the **TheRewarderPool** so the **accountingToken** is minted in **TheRewarderPool**. 
+4. **TheRewarderPool** doesn't care about if someone **deposited** their **liquidityToken** through a flash loan or not. All that matters is that a **deposit()** is made, which mints **accountingToken**.
+5. Execute **distributeRewards()** on **TheRewarderPool** which will see how much the current **sender** has deposited in relation to everyone else, to get the amount of the **rewardToken** to mint for the current **sender**.
+
+Example of how this could work to reduce everyone's **rewardToken** to near 0:
+
+**Reward to give out every 5 days**: 1000
+**Formula to get Percentage owed of the reward**: currentPersonAccountingTokenHelp * rewardToGiveOutEvery5Days / totalAccountingTokenHeld
+
+| Name  | Accounting Token Held | Percentage owed of the reward |
+| ------------- | ------------- |
+| Alice  | 20 | 0.01999950001 |
+| Bob  | 5 | 0.004999875003 |
+| Attacker | 1000000 | 999.9750006 |
+| Total held| 1000025|1000|

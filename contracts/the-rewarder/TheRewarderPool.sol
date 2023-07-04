@@ -79,7 +79,14 @@ contract TheRewarderPool {
         uint256 amountDeposited = accountingToken.balanceOfAt(msg.sender, lastSnapshotIdForRewards);
 
         if (amountDeposited > 0 && totalDeposits > 0) {
+            // Henryk: amountDeposited * REWARDS / totalDeposits
+            // This becomes the weighted average of what to get from the rewards from all depositors
+            // This is a clue that we want to do a massive deposit somehow (via flash loan) to
+            // have a large amount of deposits in our name
             rewards = amountDeposited.mulDiv(REWARDS, totalDeposits);
+
+            // Henryk: Make sure that the sender has not received the reward yet within
+            // this snapshot period
             if (rewards > 0 && !_hasRetrievedReward(msg.sender)) {
                 rewardToken.mint(msg.sender, rewards);
                 lastRewardTimestamps[msg.sender] = uint64(block.timestamp);

