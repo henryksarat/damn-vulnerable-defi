@@ -30,7 +30,7 @@ npx hardhat test --grep "Unstop"
 
 In **UnstoppableVault.sol**, the _flashLoan()_ method has a check to see if **totalSupply != totalAssets**. The _totalSupply_ and _totalAssets_ will increment if you call _deposit()_. However, _totalAssets_ will ONLY increase if you execute a traditional ERC20 _transfer()_ to the UnstoppableVault smart contract.
 
-**Exploit**
+### Exploit Plan
 
 Transfer Eth directly to the UnstoppableVault smart contract. Example way to do this:
 
@@ -50,7 +50,7 @@ See this in the [unstoppable.challange.js unit test](/test/unstoppable/unstoppab
 
 **FlashLoanReceiver.sol** is an honest receiver (aka victim) of the flash loan and implements **IERC3156FlashBorrower** interface how it is supposed to. However, the Pool (**NaiveReceiverLenderPool.sol**) has a bad programmer that doesn't even check who is calling for the flash loan. The Pool blindly executes on whichever smart contract is passed in that implements the **IERC3156FlashBorrower** interface.
 
-**Exploit**
+### Exploit Plan
 
 1. Create an attacker smart contract which has the address of the Pool and the victim that implemented **IERC3156FlashBorrower**.
 2. Execute a flash loan of 0 amount 10 times. The victim smart contract pays back the full amount plus the Pool fee of 1 ether. Calling this 10 times will then effectively drain the 10 ether that the victim had.
@@ -76,7 +76,8 @@ Concepts:
 
 The **TrusterLenderPool** will transfer the requested amount to the borrower and then blindly execute any encoded function through the __byte calldata__ parameter against a target smart contract using __.functionCall()__
 
-Exploit Plan:
+### Exploit Plan
+
 1. Encode the __approve()__ function and pass as the __byte calldata__ parameter. Set the __attacker__ smart contract as who to approve for.
 2. Set the __target__ smart contract to be the token of the pool
 3. Take out a **0** loan to not have to even bothering returning it. This will make the flash loan succeed. Alternatively, if a flash loan amount is taken out, it must be returned to the pool so the flashLoan succeeds. I did a **0** amount to just have less code and not have to do the __transfer()__ back. 
@@ -86,7 +87,7 @@ See this in the [truster.challange.js unit test](/test/truster/truster.challenge
 
 This can also be done in one transaction by wrapping everything in one smart contract. See [TrustedAttacker.sol](contracts/truster/TrustedAttacker.sol) to see how.
 
-Concepts:
+### Concepts
 * Tricking another smart contract to call __approve()__ on itself to be drained
 * Encoding a function call
 * Executing an encoded function against a smart contract using __.functionCall()__
@@ -95,7 +96,8 @@ Concepts:
 
 The Pool has a simple way to make a **deposit()** and a **withdrawl()** for a smart contract at anytime. When making a flash loan, the Pool will execute a function against a smart contract that has implemented the **execute()** function with no paramters. __Value__ is passed to the **execute()** function because it has the modifier of __payable__. One thing to notice about the flash loan method is that it "verifies" the flash loan is paid back if the balance held by the Pool smart contract is back to what it used. There is no check on how that balance is actually comprised of.
 
-The Exploit:
+### Exploit Plan
+
 1. Since the flash loan verify step only cares about the total balance help by the Pool, we will call the flash loan and when we receive the funds as the attacker, we will automatically **deposit()** them when our **execute()** function is called. Making the deposit will fulfil the flash loan condition of the loan being paid back. Remember that the Pool doesn't care who owns what tokens. So we essentially just robbing from the Pool itself and putting it in our name, will satisfy the Pool verification steps of the flash loan.
 2. After the **deposit()** is executed in the **execute()** method, the Pool smart contract will verify the balances of the Pool. This will complete the flash loan.
 3. The attacker smart contract will now call **withdraw()** since the attacker smart contract now own the tokens in the Pool map
@@ -105,7 +107,7 @@ See this in the [side-entrance.challange.js unit test](/test/side-entrance/side-
 
 See [SideEntranceAttacker.sol](contracts/side-entrance/SideEntranceAttacker.sol) to see how the attacker smart contract was implemented.
 
-Concepts:
+### Concepts
 * Emit event
 * Execute against a smart contract even though the smart contract doesn't inherit the intended interface
 * Override **receive()** function of the smart contract
@@ -122,7 +124,8 @@ The **FlashLoanerPool** is responsible for the flash loan. It will call a functi
 * **withdraw()** - burn the __accountingToken__ and use **safeTransfer()** to send back the __liqudityToken__ to the sender.
 * **distributeRewards()** - this function will see what the current amount of __deposits__ are and the amount deposited by the current caller (aka sender) of **distributeRewards()**. A calculation is made and a mint of __rewardToken__ happens and is assigned to the sender. There is a time check to make sure that a distribution has not happened within 5 days of the last distribution. 
 
-The Exploit:
+### Exploit Plan
+
 1. Move the EVM time forward by 5 days.
 2. Receive the max amount of **liquidityToken** possible in the flash loan by implementing the **receiveFlashLoan(uint256)** in the attacker smart contract and getting the token balance of the **FlashLoanerPool** for the **liquidityToken**.
 3. When the flash loan is received, **deposit()** it into the **TheRewarderPool** so the **accountingToken** is minted in **TheRewarderPool**. 
@@ -146,7 +149,7 @@ See this in the [the-rewarder.challange.js unit test](/test/the-rewarder/the-rew
 
 See [RewardAttack.sol](contracts/the-rewarder/RewardAttack.sol) to see how the attacker smart contract was implemented.
 
-Concepts:
+### Concepts
 * Use three tokens for liquidity, governance (accountingToken), and rewarding
 * Use role modifiers for functions. Example roles: BURNER_ROLE, MINTER_ROLE, SNAPSHOT_ROLE
 * Use OpenZeppelin's ERC20Snapshot for efficient storage of past token balances to be later queried at any point in time
