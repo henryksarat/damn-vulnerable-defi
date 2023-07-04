@@ -30,14 +30,14 @@ describe('[Challenge] Truster', function () {
 
         // Henryk Exploit Plan:
         // 1. Encode the approve() function and pass as the "byte calldata"__" parameter. 
-        // Set the attacker smart contract as who to approve.
+        // Set the attacker smart contract as who to approve for.
         // 2. Set the "target" smart contract to be the token of the pool
         // 3. Take out a "0" loan to not have to even bothering returning it. This will make
         // the flash loan succeed. Alternatively, if a flash loan amount is taken out,
         // it must be returned to the pool so the flashLoan succeeds. I did a "0" amount to just
         // have less code and not have to do the transfer back.
         // 4. Since "approve" was called on behalf of the pool, execute a "transferFrom"
-        // on the ERC20 token to take drain the pool
+        // on the ERC20 token to drain the pool
 
         attacker = await (await ethers.getContractFactory('TrustedAttacker', player)).deploy(pool.address, token.address);
         await attacker.attack();

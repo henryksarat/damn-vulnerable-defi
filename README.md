@@ -74,19 +74,19 @@ Concepts:
 
 ## Truster
 
-The **TrusterLenderPool** will transfer the requested amount to the borrower and then blindly execute any encoded function through the __byte calldata__ parameter against a target smart contract using __.functionCall__
+The **TrusterLenderPool** will transfer the requested amount to the borrower and then blindly execute any encoded function through the __byte calldata__ parameter against a target smart contract using __.functionCall()__
 
 Exploit Plan:
-1. Encode the __approve()__ function and pass as the __byte calldata__ parameter. Set the attacker smart contract as who to approve.
+1. Encode the __approve()__ function and pass as the __byte calldata__ parameter. Set the __attacker__ smart contract as who to approve for.
 2. Set the __target__ smart contract to be the token of the pool
 3. Take out a **0** loan to not have to even bothering returning it. This will make the flash loan succeed. Alternatively, if a flash loan amount is taken out, it must be returned to the pool so the flashLoan succeeds. I did a **0** amount to just have less code and not have to do the __transfer()__ back. 
-4. Since __approve()__ was called on behalf of the Pool (because we encoded it), execute a __transferFrom()__"__ on the ERC20 token to drain the pool
+4. Since __approve()__ was called on behalf of the Pool (because we encoded it), execute a __transferFrom()__ on the ERC20 token to drain the pool
 
 See this in the [truster.challange.js unit test](/test/truster/truster.challenge.js).
 
 This can also be done in one transaction by wrapping everything in one smart contract. See [TrustedAttacker.sol](contracts/truster/TrustedAttacker.sol) to see how.
 
 Concepts:
-* Tricking another smart contract to call __approve()__"__ on itself to be drained
+* Tricking another smart contract to call __approve()__ on itself to be drained
 * Encoding a function call
 * Executing an encoded function against a smart contract using __.functionCall()__
