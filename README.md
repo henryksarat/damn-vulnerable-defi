@@ -41,7 +41,8 @@ await token.connect(player).transfer(vault.address, 1n);
 See this in the [unstoppable.challange.js unit test](/test/unstoppable/unstoppable.challenge.js).
 
 
-**Concepts**
+### Concepts
+
 * ERC20 transfer, safeTransferFrom, safeTransfer
 * Creating a [TokenVault (ERC4626)](https://ethereum.org/en/developers/docs/standards/tokens/erc-4626/)
 
@@ -68,7 +69,8 @@ See this in the [naive-receiver.challange.js unit test](/test/naive-receiver/nai
 
 This can also be done in one transaction by wrapping the execution in a smart contract. See [NaiveAttacker.sol](contracts/naive-receiver/NaiveAttacker.sol) to see how.
 
-Concepts:
+### Concepts
+
 * Create an interface to call against
 * Using the **IERC3156FlashBorrower** interface
 
@@ -88,6 +90,7 @@ See this in the [truster.challange.js unit test](/test/truster/truster.challenge
 This can also be done in one transaction by wrapping everything in one smart contract. See [TrustedAttacker.sol](contracts/truster/TrustedAttacker.sol) to see how.
 
 ### Concepts
+
 * Tricking another smart contract to call __approve()__ on itself to be drained
 * Encoding a function call
 * Executing an encoded function against a smart contract using __.functionCall()__
@@ -108,6 +111,7 @@ See this in the [side-entrance.challange.js unit test](/test/side-entrance/side-
 See [SideEntranceAttacker.sol](contracts/side-entrance/SideEntranceAttacker.sol) to see how the attacker smart contract was implemented.
 
 ### Concepts
+
 * Emit event
 * Execute against a smart contract even though the smart contract doesn't inherit the intended interface
 * Override **receive()** function of the smart contract
@@ -150,6 +154,7 @@ See this in the [the-rewarder.challange.js unit test](/test/the-rewarder/the-rew
 See [RewardAttack.sol](contracts/the-rewarder/RewardAttack.sol) to see how the attacker smart contract was implemented.
 
 ### Concepts
+
 * Use three tokens for liquidity, governance (accountingToken), and rewarding
 * Use role modifiers for functions. Example roles: BURNER_ROLE, MINTER_ROLE, SNAPSHOT_ROLE
 * Use OpenZeppelin's ERC20Snapshot for efficient storage of past token balances to be later queried at any point in time
