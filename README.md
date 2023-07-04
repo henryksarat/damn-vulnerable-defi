@@ -90,3 +90,23 @@ Concepts:
 * Tricking another smart contract to call __approve()__ on itself to be drained
 * Encoding a function call
 * Executing an encoded function against a smart contract using __.functionCall()__
+
+## Side Entrance
+
+The Pool has a simple way to make a **deposit()** and a **withdrawl()** for a smart contract at anytime. When making a flash loan, the Pool will execute a function against a smart contract that has implemented the **execute()** function with no paramters. __Value__ is passed to the **execute()** function because it has the modifier of __payable__. One thing to notice about the flash loan method is that it "verifies" the flash loan is paid back if the balance held by the Pool smart contract is back to what it used. There is no check on how that balance is actually comprised of.
+
+The Exploit:
+1. Since the flash loan verify step only cares about the total balance help by the Pool, we will call the flash loan and when we receive the funds as the attacker, we will automatically **deposit()** them when our **execute()** function is called. Making the deposit will fulfil the flash loan condition of the loan being paid back. Remember that the Pool doesn't care who owns what tokens. So we essentially just robbing from the Pool itself and putting it in our name, will satisfy the Pool verification steps of the flash loan.
+2. After the **deposit()** is executed in the **execute()** method, the Pool smart contract will verify the balances of the Pool. This will complete the flash loan.
+3. The attacker smart contract will now call **withdraw()** since the attacker smart contract now own the tokens in the Pool map
+4. Once the attcker smart contract gets the Eth, the **receive()** function is called that we have overridden. In this function we will automatically send to an outside address.
+
+See this in the [side-entrance.challange.js unit test](/test/side-entrance/side-entrance.challenge.js).
+
+See [SideEntranceAttacker.sol](contracts/side-entrance/SideEntranceAttacker.sol) to see how the attacker smart contract was implemented.
+
+Concepts:
+* Emit event
+* Execute against a smart contract even though the smart contract doesn't inherit the intended interface
+* Override **receive()** function of the smart contract
+* Using __payable__ to **send()** Eth

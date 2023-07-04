@@ -20,6 +20,7 @@ contract SideEntranceLenderPool {
     event Deposit(address indexed who, uint256 amount);
     event Withdraw(address indexed who, uint256 amount);
 
+    // Henryk: payable means that ether is being sent
     function deposit() external payable {
         unchecked {
             balances[msg.sender] += msg.value;
@@ -33,6 +34,9 @@ contract SideEntranceLenderPool {
         delete balances[msg.sender];
         emit Withdraw(msg.sender, amount);
 
+        // Henryk: this will trigger the "receive()" function on the sender
+        // which is the fallback function of any smart contract 
+        // when Eth is received
         SafeTransferLib.safeTransferETH(msg.sender, amount);
     }
 
