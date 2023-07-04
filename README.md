@@ -113,11 +113,11 @@ Concepts:
 
 ## Rewarder
 
-# FlashLoanerPool
+### FlashLoanerPool
 
 The **FlashLoanerPool** is responsible for the flash loan. It will call a function against the **sender** as long as **receiveFlashLoan(uint256)** is implemented. As a verification step to end the flash loan, the flash loan function will check that the balance of the tokens are the same amount as before giving out the flash loan. Note, the verification step in the flash loan just checks the **total tokens** in the Pool and __not__ who owns what tokens. 
 
-# TheRewarderPool
+### TheRewarderPool
 * **despoit()** - deposit the __liqudityToken__ and mint the same amount of the __accountingToken__. Finally, use **safeTransferFrom()** to remove the __liqudityToken__.
 * **withdraw()** - burn the __accountingToken__ and use **safeTransfer()** to send back the __liqudityToken__ to the sender.
 * **distributeRewards()** - this function will see what the current amount of __deposits__ are and the amount deposited by the current caller (aka sender) of **distributeRewards()**. A calculation is made and a mint of __rewardToken__ happens and is assigned to the sender. There is a time check to make sure that a distribution has not happened within 5 days of the last distribution. 
@@ -141,3 +141,12 @@ Example of how this could work to reduce everyone's **rewardToken** to near 0:
 | Bob  | 5 | 0.004999875003 |
 | Attacker | 1000000 | 999.9750006 |
 | **Total held**| 1000025|1000|
+
+See this in the [the-rewarder.challange.js unit test](/test/the-rewarder/the-rewarder.challenge.js).
+
+See [RewardAttack.sol](contracts/the-rewarder/RewardAttack.sol) to see how the attacker smart contract was implemented.
+
+Concepts:
+* Use three tokens for liquidity, governance (accountingToken), and rewarding
+* Use role modifiers for functions. Example roles: BURNER_ROLE, MINTER_ROLE, SNAPSHOT_ROLE
+* Use OpenZeppelin's ERC20Snapshot for efficient storage of past token balances to be later queried at any point in time
