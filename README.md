@@ -37,7 +37,7 @@ npx hardhat test --grep "Unstop"
 
 In **UnstoppableVault.sol**, the _flashLoan()_ method has a check to see if **totalSupply != totalAssets**. The _totalSupply_ and _totalAssets_ will increment if you call _deposit()_. However, _totalAssets_ will ONLY increase if you execute a traditional ERC20 _transfer()_ to the UnstoppableVault smart contract.
 
-### Exploit Plan
+#### Exploit Plan
 
 Transfer Eth directly to the UnstoppableVault smart contract. Example way to do this:
 
@@ -48,7 +48,7 @@ await token.connect(player).transfer(vault.address, 1n);
 See this in the [unstoppable.challange.js unit test](/test/unstoppable/unstoppable.challenge.js).
 
 
-### Concepts
+#### Concepts
 
 * ERC20 transfer, safeTransferFrom, safeTransfer
 * Creating a [TokenVault (ERC4626)](https://ethereum.org/en/developers/docs/standards/tokens/erc-4626/)
