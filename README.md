@@ -158,3 +158,38 @@ See [RewardAttack.sol](contracts/the-rewarder/RewardAttack.sol) to see how the a
 * Use three tokens for liquidity, governance (accountingToken), and rewarding
 * Use role modifiers for functions. Example roles: BURNER_ROLE, MINTER_ROLE, SNAPSHOT_ROLE
 * Use OpenZeppelin's ERC20Snapshot for efficient storage of past token balances to be later queried at any point in time
+* Increase EVM time
+
+## Selfie
+
+### SimpleGovernance.sol
+* This is the Governance smart contact
+* **queueAction()** -  function to add actions to be executed later. However, you can only **queueAction()** if you have MORE THAN 50% of the supply of the DVT token. The action is added with the current timestamp. This time stamp is used to check against for the __2 day cool down period__.
+* **executeAction()** - function to execute a queued action if it has gone past the the __2 day cool down period__. The action that that can be executed is a method on a __target__ smart contact with the desired paramters (this was set when executing **queueAction()**).
+
+### SelfiePool.sol
+* The Pool smart contact
+* **flashLoan()** - function that accepts a receiver that must implement the **IERC3156FlashBorrower** interface, which has a **onFlashLoan()** function that will be called to send the flashLoan. Then finally, the method will call **transferFrom()** to take back the tokens. So the caller must **approve()** the tokens to be taken back by the pool.
+* **emergencyExit()** - function is used to move ALL tokens from the pool to the __receiver__ address. This can only be called by the Governance smart contract (there's a __onlyGovernance__ mondifier).
+
+### Exploit Plan
+
+1. Take a flash loan out for more than 50% of available tokens
+2. While the flash loan is taken out, queue an action on the Governance smart contract. The **queueAction()** method on the governance smart contract checks if the attacker smart contract has more than 50% of the supply to be able to have the power to **queueAction()**.
+3. Increase the EVM time by 2 days since the Governance smart contact has a __cool down period of 2 days__ before queued actions can be executed on.
+4. Finally execute the action that was queued by calling **executeAction()** on the Governance smart contract.
+
+See this in the [selfie.challange.js unit test](/test/selfie/selfie.challenge.js).
+
+See [SelfieAttacker.sol](contracts/selfie/SelfieAttacker.sol) to see how the attacker smart contract was implemented.
+
+
+### Concepts
+
+* Create interface
+* Token approve, transfer, balanceOf
+* Use **encodeWithSignature()** to encode abi with method to later using **.call()** to execute a method and parameters
+* Pool calls **transfer()** so the caller to the flash loan has to **approve() on the token
+* Token snap shot
+* Increase EVM time
+* Governance 
