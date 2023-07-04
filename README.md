@@ -131,7 +131,7 @@ Example of how this could work to reduce everyone's **rewardToken** to near 0:
 **Formula to get Percentage owed of the reward**: currentPersonAccountingTokenHelp * rewardToGiveOutEvery5Days / totalAccountingTokenHeld
 
 | Name  | Accounting Token Held | Percentage owed of the reward |
-| ------------- | ------------- |
+|-------|-----------------------|-------------------------------|
 | Alice  | 20 | 0.01999950001 |
 | Bob  | 5 | 0.004999875003 |
 | Attacker | 1000000 | 999.9750006 |
