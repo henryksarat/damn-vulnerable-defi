@@ -119,7 +119,7 @@ The **FlashLoanerPool** is responsible for the flash loan. It will call a functi
 **TheRewarderPool** has a function called **distributeRewards()** that is the bulk of our interest. This function will see what the current amount of deposits are and the amount deposited by the current caller (aka sender) of **distributeRewards()**. There is a time check to make sure that a distribution has not happened within 5 days of the last distribution. 
 
 The Exploit:
-1. Send time forward by 5 days.
+1. Move the even time forward by 5 days.
 2. Receive the max amount of **liquidityToken** possible in the flash loan by implementing the **receiveFlashLoan(uint256)** in the attacker smart contract and getting the token balance of the **FlashLoanerPool** for the **liquidityToken**.
 3. When the flash loan is received, **deposit()** it into the **TheRewarderPool** so the **accountingToken** is minted in **TheRewarderPool**. 
 4. **TheRewarderPool** doesn't care about if someone **deposited** their **liquidityToken** through a flash loan or not. All that matters is that a **deposit()** is made, which mints **accountingToken**.
@@ -128,11 +128,12 @@ The Exploit:
 Example of how this could work to reduce everyone's **rewardToken** to near 0:
 
 **Reward to give out every 5 days**: 1000
-**Formula to get Percentage owed of the reward**: currentPersonAccountingTokenHelp * rewardToGiveOutEvery5Days / totalAccountingTokenHeld
 
-| Name  | Accounting Token Held | Percentage owed of the reward |
+**Formula to get Reward amount owed**: currentPersonAccountingTokenHeld * rewardToGiveOutEvery5Days / totalAccountingTokenHeld
+
+| Name  | Accounting Token Held | Reward amount owed |
 |-------|-----------------------|-------------------------------|
 | Alice  | 20 | 0.01999950001 |
 | Bob  | 5 | 0.004999875003 |
 | Attacker | 1000000 | 999.9750006 |
-| Total held| 1000025|1000|
+| **Total held**| 1000025|1000|
