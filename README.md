@@ -20,6 +20,13 @@ DO NOT USE IN PRODUCTION.
 
 # Solution Details
 
+How to start:
+
+```
+yarn start
+npx hardhat test
+```
+
 How to execute one test for a quick development loop:
 
 ```

