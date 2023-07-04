@@ -58,7 +58,7 @@ See this in the [unstoppable.challange.js unit test](/test/unstoppable/unstoppab
 
 **FlashLoanReceiver.sol** is an honest receiver (aka victim) of the flash loan and implements **IERC3156FlashBorrower** interface how it is supposed to. However, the Pool (**NaiveReceiverLenderPool.sol**) has a bad programmer that doesn't even check who is calling for the flash loan. The Pool blindly executes on whichever smart contract is passed in that implements the **IERC3156FlashBorrower** interface.
 
-### Exploit Plan
+#### Exploit Plan
 
 1. Create an attacker smart contract which has the address of the Pool and the victim that implemented **IERC3156FlashBorrower**.
 2. Execute a flash loan of 0 amount 10 times. The victim smart contract pays back the full amount plus the Pool fee of 1 ether. Calling this 10 times will then effectively drain the 10 ether that the victim had.
@@ -76,7 +76,7 @@ See this in the [naive-receiver.challange.js unit test](/test/naive-receiver/nai
 
 This can also be done in one transaction by wrapping the execution in a smart contract. See [NaiveAttacker.sol](contracts/naive-receiver/NaiveAttacker.sol) to see how.
 
-### Concepts
+#### Concepts
 
 * Create an interface to call against
 * Using the **IERC3156FlashBorrower** interface
@@ -85,7 +85,7 @@ This can also be done in one transaction by wrapping the execution in a smart co
 
 The **TrusterLenderPool** will transfer the requested amount to the borrower and then blindly execute any encoded function through the __byte calldata__ parameter against a target smart contract using __.functionCall()__
 
-### Exploit Plan
+#### Exploit Plan
 
 1. Encode the __approve()__ function and pass as the __byte calldata__ parameter. Set the __attacker__ smart contract as who to approve for.
 2. Set the __target__ smart contract to be the token of the pool
@@ -96,7 +96,7 @@ See this in the [truster.challange.js unit test](/test/truster/truster.challenge
 
 This can also be done in one transaction by wrapping everything in one smart contract. See [TrustedAttacker.sol](contracts/truster/TrustedAttacker.sol) to see how.
 
-### Concepts
+#### Concepts
 
 * Tricking another smart contract to call __approve()__ on itself to be drained
 * Encoding a function call
@@ -106,7 +106,7 @@ This can also be done in one transaction by wrapping everything in one smart con
 
 The Pool has a simple way to make a **deposit()** and a **withdrawl()** for a smart contract at anytime. When making a flash loan, the Pool will execute a function against a smart contract that has implemented the **execute()** function with no paramters. __Value__ is passed to the **execute()** function because it has the modifier of __payable__. One thing to notice about the flash loan method is that it "verifies" the flash loan is paid back if the balance held by the Pool smart contract is back to what it used. There is no check on how that balance is actually comprised of.
 
-### Exploit Plan
+#### Exploit Plan
 
 1. Since the flash loan verify step only cares about the total balance help by the Pool, we will call the flash loan and when we receive the funds as the attacker, we will automatically **deposit()** them when our **execute()** function is called. Making the deposit will fulfil the flash loan condition of the loan being paid back. Remember that the Pool doesn't care who owns what tokens. So we essentially just robbing from the Pool itself and putting it in our name, will satisfy the Pool verification steps of the flash loan.
 2. After the **deposit()** is executed in the **execute()** method, the Pool smart contract will verify the balances of the Pool. This will complete the flash loan.
@@ -117,7 +117,7 @@ See this in the [side-entrance.challange.js unit test](/test/side-entrance/side-
 
 See [SideEntranceAttacker.sol](contracts/side-entrance/SideEntranceAttacker.sol) to see how the attacker smart contract was implemented.
 
-### Concepts
+#### Concepts
 
 * Emit event
 * Execute against a smart contract even though the smart contract doesn't inherit the intended interface
@@ -126,16 +126,16 @@ See [SideEntranceAttacker.sol](contracts/side-entrance/SideEntranceAttacker.sol)
 
 ## Rewarder
 
-### FlashLoanerPool
+#### FlashLoanerPool
 
 The **FlashLoanerPool** is responsible for the flash loan. It will call a function against the **sender** as long as **receiveFlashLoan(uint256)** is implemented. As a verification step to end the flash loan, the flash loan function will check that the balance of the tokens are the same amount as before giving out the flash loan. Note, the verification step in the flash loan just checks the **total tokens** in the Pool and __not__ who owns what tokens. 
 
-### TheRewarderPool
+#### TheRewarderPool
 * **despoit()** - deposit the __liqudityToken__ and mint the same amount of the __accountingToken__. Finally, use **safeTransferFrom()** to remove the __liqudityToken__.
 * **withdraw()** - burn the __accountingToken__ and use **safeTransfer()** to send back the __liqudityToken__ to the sender.
 * **distributeRewards()** - this function will see what the current amount of __deposits__ are and the amount deposited by the current caller (aka sender) of **distributeRewards()**. A calculation is made and a mint of __rewardToken__ happens and is assigned to the sender. There is a time check to make sure that a distribution has not happened within 5 days of the last distribution. 
 
-### Exploit Plan
+#### Exploit Plan
 
 1. Move the EVM time forward by 5 days.
 2. Receive the max amount of **liquidityToken** possible in the flash loan by implementing the **receiveFlashLoan(uint256)** in the attacker smart contract and getting the token balance of the **FlashLoanerPool** for the **liquidityToken**.
@@ -160,7 +160,7 @@ See this in the [the-rewarder.challange.js unit test](/test/the-rewarder/the-rew
 
 See [RewardAttack.sol](contracts/the-rewarder/RewardAttack.sol) to see how the attacker smart contract was implemented.
 
-### Concepts
+#### Concepts
 
 * Use three tokens for liquidity, governance (accountingToken), and rewarding
 * Use role modifiers for functions. Example roles: BURNER_ROLE, MINTER_ROLE, SNAPSHOT_ROLE
@@ -169,17 +169,17 @@ See [RewardAttack.sol](contracts/the-rewarder/RewardAttack.sol) to see how the a
 
 ## Selfie
 
-### SimpleGovernance.sol
+#### SimpleGovernance.sol
 * This is the Governance smart contact
 * **queueAction()** -  function to add actions to be executed later. However, you can only **queueAction()** if you have MORE THAN 50% of the supply of the DVT token. The action is added with the current timestamp. This time stamp is used to check against for the __2 day cool down period__.
 * **executeAction()** - function to execute a queued action if it has gone past the the __2 day cool down period__. The action that that can be executed is a method on a __target__ smart contact with the desired paramters (this was set when executing **queueAction()**).
 
-### SelfiePool.sol
+#### SelfiePool.sol
 * The Pool smart contact
 * **flashLoan()** - function that accepts a receiver that must implement the **IERC3156FlashBorrower** interface, which has a **onFlashLoan()** function that will be called to send the flashLoan. Then finally, the method will call **transferFrom()** to take back the tokens. So the caller must **approve()** the tokens to be taken back by the pool.
 * **emergencyExit()** - function is used to move ALL tokens from the pool to the __receiver__ address. This can only be called by the Governance smart contract (there's a __onlyGovernance__ mondifier).
 
-### Exploit Plan
+#### Exploit Plan
 
 1. Take a flash loan out for more than 50% of available tokens
 2. While the flash loan is taken out, queue an action on the Governance smart contract. The **queueAction()** method on the governance smart contract checks if the attacker smart contract has more than 50% of the supply to be able to have the power to **queueAction()**.
@@ -190,8 +190,7 @@ See this in the [selfie.challange.js unit test](/test/selfie/selfie.challenge.js
 
 See [SelfieAttacker.sol](contracts/selfie/SelfieAttacker.sol) to see how the attacker smart contract was implemented.
 
-
-### Concepts
+#### Concepts
 
 * Create interface
 * Token approve, transfer, balanceOf
