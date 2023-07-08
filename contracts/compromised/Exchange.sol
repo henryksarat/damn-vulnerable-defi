@@ -30,6 +30,9 @@ contract Exchange is ReentrancyGuard {
         oracle = TrustfulOracle(_oracle);
     }
 
+    // Henryk: Having payable will store the Eth in this smart contract from the
+    // sender, which is why we send back the difference between sent Eth and the 
+    // price of the NFT
     function buyOne() external payable nonReentrant returns (uint256 id) {
         if (msg.value == 0)
             revert InvalidPayment();
@@ -41,12 +44,16 @@ contract Exchange is ReentrancyGuard {
 
         id = token.safeMint(msg.sender);
         unchecked {
+            // Henryk: Send back anything extra back to the sender just in 
+            // case they sent too much
             payable(msg.sender).sendValue(msg.value - price);
         }
 
         emit TokenBought(msg.sender, id, price);
     }
 
+
+    // Henryk: there is no check on price so that can be exploited
     function sellOne(uint256 id) external nonReentrant {
         if (msg.sender != token.ownerOf(id))
             revert SellerNotOwner(id);
@@ -62,6 +69,7 @@ contract Exchange is ReentrancyGuard {
         token.transferFrom(msg.sender, address(this), id);
         token.burn(id);
 
+        // Henryk: Send back whatever the current price is to the sender
         payable(msg.sender).sendValue(price);
 
         emit TokenSold(msg.sender, id, price);
