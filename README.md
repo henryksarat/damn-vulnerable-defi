@@ -33,7 +33,7 @@ How to execute one test for a quick development loop:
 npx hardhat test --grep "Unstop"
 ```
 
-## Unstoppable
+## 1. Unstoppable
 
 In **UnstoppableVault.sol**, the _flashLoan()_ method has a check to see if **totalSupply != totalAssets**. The _totalSupply_ and _totalAssets_ will increment if you call _deposit()_. However, _totalAssets_ will ONLY increase if you execute a traditional ERC20 _transfer()_ to the UnstoppableVault smart contract.
 
@@ -54,7 +54,7 @@ See this in the [unstoppable.challange.js unit test](/test/unstoppable/unstoppab
 * Creating a [TokenVault (ERC4626)](https://ethereum.org/en/developers/docs/standards/tokens/erc-4626/)
 
 
-## Naive Receiver
+## 2. Naive Receiver
 
 **FlashLoanReceiver.sol** is an honest receiver (aka victim) of the flash loan and implements **IERC3156FlashBorrower** interface how it is supposed to. However, the Pool (**NaiveReceiverLenderPool.sol**) has a bad programmer that doesn't even check who is calling for the flash loan. The Pool blindly executes on whichever smart contract is passed in that implements the **IERC3156FlashBorrower** interface.
 
@@ -81,7 +81,7 @@ This can also be done in one transaction by wrapping the execution in a smart co
 * Create an interface to call against
 * Using the **IERC3156FlashBorrower** interface
 
-## Truster
+## 3. Truster
 
 The **TrusterLenderPool** will transfer the requested amount to the borrower and then blindly execute any encoded function through the __byte calldata__ parameter against a target smart contract using __.functionCall()__
 
@@ -102,7 +102,7 @@ This can also be done in one transaction by wrapping everything in one smart con
 * Encoding a function call
 * Executing an encoded function against a smart contract using __.functionCall()__
 
-## Side Entrance
+## 4. Side Entrance
 
 The Pool has a simple way to make a **deposit()** and a **withdrawl()** for a smart contract at anytime. When making a flash loan, the Pool will execute a function against a smart contract that has implemented the **execute()** function with no paramters. __Value__ is passed to the **execute()** function because it has the modifier of __payable__. One thing to notice about the flash loan method is that it "verifies" the flash loan is paid back if the balance held by the Pool smart contract is back to what it used. There is no check on how that balance is actually comprised of.
 
@@ -124,7 +124,7 @@ See [SideEntranceAttacker.sol](contracts/side-entrance/SideEntranceAttacker.sol)
 * Override **receive()** function of the smart contract
 * Using __payable__ to **send()** Eth
 
-## Rewarder
+## 5. Rewarder
 
 #### FlashLoanerPool
 
@@ -167,7 +167,7 @@ See [RewardAttack.sol](contracts/the-rewarder/RewardAttack.sol) to see how the a
 * Use OpenZeppelin's ERC20Snapshot for efficient storage of past token balances to be later queried at any point in time
 * Increase EVM time
 
-## Selfie
+## 6. Selfie
 
 #### SimpleGovernance.sol
 * This is the Governance smart contact
@@ -200,7 +200,7 @@ See [SelfieAttacker.sol](contracts/selfie/SelfieAttacker.sol) to see how the att
 * Increase EVM time
 * Governance 
 
-## Compromised
+## 7. Compromised
 
 #### Hint 1 / 8
 
