@@ -202,15 +202,44 @@ See [SelfieAttacker.sol](contracts/selfie/SelfieAttacker.sol) to see how the att
 
 ## Compromised
 
+### Hint 1 / 8
+
 #### Exchange.sol
 
 * The exchange __completely__ relies on the oracle to provide the median price of an NFT. This is relied upon on the **buyOne()** and **sellOne()** functions.
+
+### Hint 2 / 8
 
 #### TrustfulOracle.sol
 
 * Is initilized with an array of __sources__ that act as trusted entities to dictate what the price is of a certain __symbol__
 * **postPrice()** - allows the __source__ to set what the price is of a symbol
 * **getMedianPrice()** - sorts all of the array prices provided by the __sources__ for a certain __symbol__ and gives the median number in the sorted array. If the array is odd, the middle number is returned, else if the array is even then the average of the two middle numbers is returned. There is no validation for rogue price setting.
+
+### Hint 3 / 8
+
+Notice that there are 2 sets of hex characters returned. You should try to convert this to something readable.
+
+```
+Hex 1: 4d 48 68 6a 4e 6a 63 34 5a 57 59 78 59 57 45 30 4e 54 5a 6b 59 54 59 31 59 7a 5a 6d 59 7a 55 34 4e 6a 46 6b 4e 44 51 34 4f 54 4a 6a 5a 47 5a 68 59 7a 42 6a 4e 6d 4d 34 59 7a 49 31 4e 6a 42 69 5a 6a 42 6a 4f 57 5a 69 59 32 52 68 5a 54 4a 6d 4e 44 63 7a 4e 57 45 35
+
+Hex 2: 4d 48 67 79 4d 44 67 79 4e 44 4a 6a 4e 44 42 68 59 32 52 6d 59 54 6c 6c 5a 44 67 34 4f 57 55 32 4f 44 56 6a 4d 6a 4d 31 4e 44 64 68 59 32 4a 6c 5a 44 6c 69 5a 57 5a 6a 4e 6a 41 7a 4e 7a 46 6c 4f 54 67 33 4e 57 5a 69 59 32 51 33 4d 7a 59 7a 4e 44 42 69 59 6a 51 34
+```
+
+### Hint 4 / 8
+
+Convert the hex to text. The text will look like it's base64 encoded. Decode this base64. What does it look like?
+
+
+### Hint 5 / 8
+
+The decoded base 64 is the private key. There are two of them. 
+
+### Hint 6 / 8
+
+**getMedianPrice()** returns the middle number of the sorted prices from three oracles. So if you control the prices from 2 oracles you can control the median price. You can execute **postPrice()** to set the price as the two oracle because you have the private keys of both of them.
+
+### Hint 7 / 8
 
 #### Exploit Plan
 
@@ -235,6 +264,9 @@ Base 64 decoded: 0x208242c40acdfa9ed889e685c23547acbed9befc60371e9875fbcd736340b
 8. Sell the NFT
 9. As the oracles set the price back to what it was originally so no one knows that anything happened
 
+### Hint 8 / 8
+
+See the final running code in [compromised.challange.js unit test](/test/compromised/compromised.challenge.js).
 
 #### Concepts
 
