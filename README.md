@@ -236,7 +236,7 @@ The decoded base 64 is the private key. There are two of them.
 
 #### Hint 6 / 8
 
-**getMedianPrice()** returns the middle number of the sorted prices from three oracles. So if you control the prices from 2 oracles you can control the median price. You can execute **postPrice()** to set the price as the two oracle because you have the private keys of both of them.
+**getMedianPrice()** returns the middle number of the sorted prices from three oracles. So if you control the prices from 2 oracles you can control the median price. You can execute **postPrice()** to set the price as two oracles because you have the private keys of both of them. This will allow you to have full control of the __median price__. The __median price__ is used blindly in the **buyOne()** and **sellOne()** functions of the __exchange__.
 
 #### Hint 7 / 8
 
