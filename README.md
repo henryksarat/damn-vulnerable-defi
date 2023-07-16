@@ -35,15 +35,34 @@ npx hardhat test --grep "Unstop"
 
 ## 1. Unstoppable
 
+#### Hint 1 / 6
+
+**UnstoppableVault.sol** implements [TokenVault (ERC4626)](https://ethereum.org/en/developers/docs/standards/tokens/erc-4626/).
+
+#### Hint 2 / 6
+
+Notice that some of the methods used (by the **UnstoppableVault.sol** and **unstoppable.challenge.js**) from the **ERC4626** implementation include: **deposit()**, **totalAssets()**, **totalSupply()**, and **maxFlashLoan()**.
+
+#### Hint 3 / 6
+
+Why is there so much focus being put on using the **deposit()** method and not a typic ERC20 **transfer()** to the vault?
+
+#### Hint 4 / 6
+
 In **UnstoppableVault.sol**, the _flashLoan()_ method has a check to see if **totalSupply != totalAssets**. The _totalSupply_ and _totalAssets_ will increment if you call _deposit()_. However, _totalAssets_ will ONLY increase if you execute a traditional ERC20 _transfer()_ to the UnstoppableVault smart contract.
 
-#### Exploit Plan
+#### Hint 5 / 6
+
+
+##### Exploit Plan
 
 Transfer Eth directly to the UnstoppableVault smart contract. Example way to do this:
 
 ```
 await token.connect(player).transfer(vault.address, 1n);
 ```
+
+#### Hint 6 / 6
 
 See this in the [unstoppable.challange.js unit test](/test/unstoppable/unstoppable.challenge.js).
 
