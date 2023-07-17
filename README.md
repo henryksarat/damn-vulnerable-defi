@@ -82,7 +82,7 @@ See this in the [unstoppable.challange.js unit test](/test/unstoppable/unstoppab
 
 #### Hint 2 / 8
 
-For the **flashLoan()** in **IERC3156FlashBorrower**, there seems to be a **receiver** parameter, indicating that **any address** can be passed in, as long as the smart contract implements **IERC3156FlashBorrower**. The flash loan is called on **receiver**.
+For the **flashLoan()** in **NaiveReceiverLenderPool.sol**, there seems to be a **receiver** parameter, indicating that **any address** can be passed in, as long as the smart contract implements **IERC3156FlashBorrower**. The flash loan is called on **receiver**.
 
 #### Hint 3 / 8
 
