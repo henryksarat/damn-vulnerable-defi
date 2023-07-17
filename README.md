@@ -137,16 +137,40 @@ This can also be done in one transaction by wrapping the execution in a smart co
 
 ## 3. Truster
 
+#### Hint 1 / 8
+
+It's weird how **TrusterLenderPool.sol** will just execute any data against any address:
+
+```
+target.functionCall(data)
+```
+
+#### Hint 2 / 8
+
+Remember that executing any function from **TrusterLenderPool.sol** will be executed with the authority of the **Pool**!
+
+#### Hint 3 / 8
+
 The **TrusterLenderPool** will transfer the requested amount to the borrower and then blindly execute any encoded function through the __byte calldata__ parameter against a target smart contract using __.functionCall()__
 
-#### Exploit Plan
+#### Hint 4 / 8
+
+How does an ERC20 __transferFrom()__ function work?
+
+#### Hint 5 / 8
+
+##### Exploit Plan
 
 1. Encode the __approve()__ function and pass as the __byte calldata__ parameter. Set the __attacker__ smart contract as who to approve for.
 2. Set the __target__ smart contract to be the token of the pool
 3. Take out a **0** loan to not have to even bothering returning it. This will make the flash loan succeed. Alternatively, if a flash loan amount is taken out, it must be returned to the pool so the flashLoan succeeds. I did a **0** amount to just have less code and not have to do the __transfer()__ back. 
 4. Since __approve()__ was called on behalf of the Pool (because we encoded it), execute a __transferFrom()__ on the ERC20 token to drain the pool
 
+#### Hint 6 / 8
+
 See this in the [truster.challange.js unit test](/test/truster/truster.challenge.js).
+
+#### Hint 7 / 8
 
 This can also be done in one transaction by wrapping everything in one smart contract. See [TrustedAttacker.sol](contracts/truster/TrustedAttacker.sol) to see how.
 

