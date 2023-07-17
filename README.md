@@ -75,9 +75,42 @@ See this in the [unstoppable.challange.js unit test](/test/unstoppable/unstoppab
 
 ## 2. Naive Receiver
 
-**FlashLoanReceiver.sol** is an honest receiver (aka victim) of the flash loan and implements **IERC3156FlashBorrower** interface how it is supposed to. However, the Pool (**NaiveReceiverLenderPool.sol**) has a bad programmer that doesn't even check who is calling for the flash loan. The Pool blindly executes on whichever smart contract is passed in that implements the **IERC3156FlashBorrower** interface.
+#### Hint 1 / 8
 
-#### Exploit Plan
+**NaiveReceiverLenderPool.sol** has a really high fee of 1 ether. Super high! You better be making a good return on the flash loan to be able to afford that fee.
+
+
+#### Hint 2 / 8
+
+For the **flashLoan()** in **IERC3156FlashBorrower**, there seems to be a **receiver** parameter, indicating that **any address** can be passed in, as long as the smart contract implements **IERC3156FlashBorrower**. The flash loan is called on **receiver**.
+
+#### Hint 3 / 8
+
+**FlashLoanReceiver.sol** is an honest receiver (aka victim) of the flash loan and implements **IERC3156FlashBorrower** interface how it is supposed to. How does **NaiveReceiverLenderPool.sol** make sure that it's customers are safe?
+
+#### Hint 4 / 8
+
+Unfortuntealy **NaiveReceiverLenderPool.sol** has a bad programmer that doesn't even check who is calling for the flash loan. The Pool blindly executes on whichever smart contract is passed in that implements the **IERC3156FlashBorrower** interface!
+
+#### Hint 5 / 8
+
+You can just take out a flash loan against a victim's address since the **Pool** does no real validation. Even a flash loan of **0** is fine since the fee for the loan is 1 ether. This can be done in the unit test in javascript this way:
+
+```
+for(var i =0; i< 10; i++) {
+    await pool.connect(player).flashLoan(victim.address, ETH, 0, new TextEncoder().encode(""))
+}
+```
+
+Notice that this will execute 10 transaction. So each **flashLoan()** has to succeed for the transaction to be accepted by the network. How can you do this in only one transaction?
+
+#### Hint 6 / 8
+
+You can do it in one transaction by making a smart contract and eecuting the 10 loops inside the smart contract. This will count as **one transaction** because the loops happened inside the smart contract itself. For the transaction to complete and be approved by the network, all the loops must succeed and the function has to execut successfully. 
+
+#### Hint 7 / 8
+
+##### Exploit Plan
 
 1. Create an attacker smart contract which has the address of the Pool and the victim that implemented **IERC3156FlashBorrower**.
 2. Execute a flash loan of 0 amount 10 times. The victim smart contract pays back the full amount plus the Pool fee of 1 ether. Calling this 10 times will then effectively drain the 10 ether that the victim had.
@@ -91,9 +124,11 @@ for(var i =0; i< 10; i++) {
 }
 ```
 
+#### Hint 8 / 8
 See this in the [naive-receiver.challange.js unit test](/test/naive-receiver/naive-receiver.challenge.js).
 
 This can also be done in one transaction by wrapping the execution in a smart contract. See [NaiveAttacker.sol](contracts/naive-receiver/NaiveAttacker.sol) to see how.
+
 
 #### Concepts
 

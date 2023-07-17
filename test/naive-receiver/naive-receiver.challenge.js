@@ -50,7 +50,7 @@ describe('[Challenge] Naive receiver', function () {
         // 3. That's it! In conclusion, by only having the address of a smart 
         // contract that interacts with this Pool (the victim), I can drain the 
         // victim because the Pool doesn't take precautions to check who is executing the flash loan.
-        // Note that "victom" is synonymous with "receiver" in the code
+        // Note that "victim" is synonymous with "receiver"/"victimReceiver" in the code
 
         const NaiveAttackerFactory = await ethers.getContractFactory("NaiveAttacker", player);
 
